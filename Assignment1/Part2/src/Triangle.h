@@ -20,18 +20,54 @@ class Triangle {
 
         // Destructor
         ~Triangle() {
+            // De-allocate memory for the triangle's vertices.
+			if (vertex_1 != nullptr) {
+				delete vertex_1;
+			}
+			if (vertex_2 != nullptr) {
+				delete vertex_2;
+			}
+			if (vertex_3 != nullptr) {
+				delete vertex_3;
+			}
+
             cout << "Triangle Object Destroyed" << endl;
         }
 
         // Getters & Setters
 		Point* getVertex1() { return vertex_1; }
-		void setVertex1(Point p) { *vertex_1 = new Point(p->getX(), p->getY(), p->getZ()); }
+        void setVertex1(Point p) {
+            // Delete any pre-allocated memory associated to vertex_1.
+            if (vertex_1 != nullptr) {
+                delete vertex_1;
+            }
+
+            // Allocate memory for vertex_1 associated to the input Point.
+            vertex_1 = new Point(p.getX(), p.getY(), p.getZ());
+        }
 
 		Point* getVertex2() { return vertex_2; }
-		void setVertex2(Point p) { *vertex_2 = new Point(p->getX(), p->getY(), p->getZ()); }
+		void setVertex2(Point p) { 
+            if (vertex_2 != nullptr) {
+                delete vertex_2;
+            }
+            vertex_2 = new Point(p.getX(), p.getY(), p.getZ());
+        }
 
 		Point* getVertex3() { return vertex_3; }
-		void setVertex3(Point p) { *vertex_3 = new Point(p->getX(), p->getY(), p->getZ()); }
+		void setVertex3(Point p) {
+            if (vertex_3 != nullptr) {
+                delete vertex_3;
+            }
+            vertex_3 = new Point(p.getX(), p.getY(), p.getZ());
+        }
+
+        // Displays the vertices of the Triangle.
+        void display() {
+            cout << "Vertex 1: " << (*vertex_1).display() << endl;
+			cout << "Vertex 2: " << (*vertex_2).display() << endl;
+			cout << "Vertex 3: " << (*vertex_3).display() << endl;
+        }
 
         // Moves the Traingle's vertices along a specified axis by distance 'd'.
         int translate(int d, char axis) {

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -28,6 +29,12 @@ class Point{
 
 		int getZ() { return z; }
 		void setZ(int zVal) { z = zVal; }
+
+        // Displays the coordinates of tthe Point.
+        string display() {
+			string coordinates = "(" + to_string(x) + ", " + to_string(y) + ", " + to_string(z) + ")";
+			return coordinates;
+        }
 
         // Moves the Point along a specified axis by distance 'd'.
         int translate(int d, char axis) {
