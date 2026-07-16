@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "Point.h"
 
 using namespace std;
@@ -71,6 +73,11 @@ class Triangle {
 
         // Moves the Traingle's vertices along a specified axis by distance 'd'.
         int translate(int d, char axis) {
+            // Check for null pointers before attemption to translate the triangle's vertices.
+			if(vertex_1 == nullptr || vertex_2 == nullptr || vertex_3 == nullptr) {
+				return -1;
+			}
+            
             vertex_1->translate(d, axis);
             vertex_2->translate(d, axis);
             vertex_3->translate(d, axis);
@@ -78,9 +85,27 @@ class Triangle {
         }
 
         double calcArea() {
-			// TODO: Implement a method that calculates the area of the triangle using the coordinates of its vertices.
+			// Check for null pointers before attempting to calculate the area of the triangle.
+            if(vertex_1 == nullptr || vertex_2 == nullptr || vertex_3 == nullptr) {
+				return -1;
+			}
+
+            // Two vectors can be calculated from the three vertices of the triangle.
+            // vector_1 = vertex_2 - vertex_1
+			Point vector_1 = Point((vertex_2->getX() - vertex_1->getX()), (vertex_2->getY() - vertex_1->getY()), (vertex_2->getZ() - vertex_1->getZ()));
+            // vector_2 = vertex_3 - vertex_1
+            Point vector_2 = Point((vertex_3->getX() - vertex_1->getX()), (vertex_3->getY() - vertex_1->getY()), (vertex_3->getZ() - vertex_1->getZ()));
+
+            // Store the cross product of vector_1 & vector_2 in vector_3.
+            Point vector_3 = Point(((vector_1.getY() * vector_2.getZ()) - (vector_1.getZ() * vector_2.getY())), ((vector_1.getZ() * vector_2.getX()) - (vector_1.getX() * vector_2.getZ())), ((vector_1.getX() * vector_2.getY()) - (vector_1.getY() * vector_2.getX())));
+
+            // Calculate the area of the Triangle.
+            // This is expressed as half the magnitude of vector_3.
+            double area = 0.5 * sqrt(pow(vector_3.getX(), 2) + pow(vector_3.getY(), 2) + pow(vector_3.getZ(), 2));
+
+            return area;
         }
 
     private:
         Point *vertex_1, *vertex_2, *vertex_3;
-}
+};
