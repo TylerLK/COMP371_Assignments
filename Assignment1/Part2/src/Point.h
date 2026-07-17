@@ -1,3 +1,6 @@
+#ifndef POINT_H
+#define POINT_H
+
 #include <iostream>
 #include <string>
 
@@ -6,53 +9,32 @@ using namespace std;
 class Point {
 public:
     // Default Constructor
-    Point() : x{ 0 }, y{ 0 }, z{ 0 } {
-        cout << "Point Object Created with Default Coordinates x = " << x << ", y = " << y << ", z = " << z << endl;
-    }
+    Point();
 
     // Constructor
-    Point(int xVal, int yVal, int zVal) : x{ xVal }, y{ yVal }, z{ zVal } {
-        cout << "Point Object Created with Coordinates x = " << x << ", y = " << y << ", z = " << z << endl;
-    }
+    Point(int xVal, int yVal, int zVal);
 
     // Destructor
-    ~Point() {
-        cout << "Point Object Destroyed" << endl;
-    }
+    ~Point();
 
     // Getters & Setters
-    int getX() { return x; }
-    void setX(int xVal) { x = xVal; }
+    int getX() const;
+    void setX(int xVal);
 
-    int getY() { return y; }
-    void setY(int yVal) { y = yVal; }
+    int getY() const;
+    void setY(int yVal);
 
-    int getZ() { return z; }
-    void setZ(int zVal) { z = zVal; }
+    int getZ() const;
+    void setZ(int zVal);
 
     // Displays the coordinates of tthe Point.
-    string display() {
-        string coordinates = "(" + to_string(x) + ", " + to_string(y) + ", " + to_string(z) + ")";
-        return coordinates;
-    }
+    string display() const;
 
     // Moves the Point along a specified axis by distance 'd'.
-    int translate(int d, char axis) {
-        switch (axis) {
-        case 'x':
-            x = x + d;
-            return 0;
-        case 'y':
-            y = y + d;
-            return 0;
-        case 'z':
-            z = z + d;
-            return 0;
-        default:
-            return -1;
-        }
-    }
+    int translate(int d, char axis);
 
 private:
     int x, y, z;
 };
+
+#endif
