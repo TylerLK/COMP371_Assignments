@@ -7,7 +7,7 @@ project ("Assignment1_Part2")
 
 # Add executable files
 file(GLOB SOURCES "src/*.cpp" "src/*.h")
-add_executable(Assignment1_Part2 ${SOURCES} "src/Triangle.cpp" "src/Point.cpp")
+add_executable(Assignment1_Part2 ${SOURCES} "src/Triangle.cpp" "src/Point.cpp" "src/Driver.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET Assignment1_Part2 PROPERTY CXX_STANDARD 20)
