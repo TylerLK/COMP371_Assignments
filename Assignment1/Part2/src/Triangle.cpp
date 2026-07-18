@@ -56,8 +56,6 @@ Triangle::~Triangle() {
     delete vertex_1;
     delete vertex_2;
     delete vertex_3;
-
-    cout << "Triangle Object Destroyed" << endl;
 }
 
 // Getters & Setters
@@ -122,6 +120,7 @@ int Triangle::translate(int d, char axis) {
     return 0;
 }
 
+// Calculates the area of the triangle.
 double Triangle::calcArea() const {
     // Check for null pointers before attempting to calculate the area of the triangle.
     if (vertex_1 == nullptr || vertex_2 == nullptr || vertex_3 == nullptr) {

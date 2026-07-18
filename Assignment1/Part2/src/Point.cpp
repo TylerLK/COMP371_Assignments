@@ -1,19 +1,13 @@
 #include "Point.h"
 
 // Default Constructor
-Point::Point() : x{ 0 }, y{ 0 }, z{ 0 } {
-	cout << "Point Object Created with Default Coordinates x = " << x << ", y = " << y << ", z = " << z << endl;
-}
+Point::Point() : x{ 0 }, y{ 0 }, z{ 0 } { }
 
 // Constructor
-Point::Point(int xVal, int yVal, int zVal) : x{ xVal }, y{ yVal }, z{ zVal } {
-	cout << "Point Object Created with Coordinates x = " << x << ", y = " << y << ", z = " << z << endl;
-}
+Point::Point(int xVal, int yVal, int zVal) : x{ xVal }, y{ yVal }, z{ zVal } { }
 
 // Destructor
-Point::~Point() {
-	cout << "Point Object Destroyed" << endl;
-}
+Point::~Point() { }
 
 // Getters & Setters
 int Point::getX() const {

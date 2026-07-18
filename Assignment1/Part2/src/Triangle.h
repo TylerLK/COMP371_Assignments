@@ -46,6 +46,7 @@ public:
     // Moves the Traingle's vertices along a specified axis by distance 'd'.
     int translate(int d, char axis);
 
+    // Calculates the area of the triangle.
     double calcArea() const;
 
 private:
