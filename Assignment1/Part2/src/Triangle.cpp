@@ -8,10 +8,10 @@ Triangle::Triangle() {
 }
 
 // Constructor
-Triangle::Triangle(Point p1, Point p2, Point p3) : vertex_1(nullptr), vertex_2(nullptr), vertex_3(nullptr) {
-    setVertex1(p1);
-    setVertex2(p2);
-    setVertex3(p3);
+Triangle::Triangle(const Point& p1, const Point& p2, const Point& p3) : vertex_1(nullptr), vertex_2(nullptr), vertex_3(nullptr) {
+    vertex_1 = new Point(p1);
+	vertex_2 = new Point(p2);
+	vertex_3 = new Point(p3);
 }
 
 // Copy Constructor
@@ -34,6 +34,11 @@ Triangle& Triangle::operator=(const Triangle& other) {
         delete vertex_1;
         delete vertex_2;
         delete vertex_3;
+
+        // Ensure the vertex pointers are not dangling.
+        vertex_1 = nullptr;
+        vertex_2 = nullptr;
+        vertex_3 = nullptr;
 
         // Allocate memory for the current object's vertices with another object's vertices.
         if (other.vertex_1) {
@@ -63,36 +68,36 @@ Point* Triangle::getVertex1() const {
     return vertex_1;
 }
 
-void Triangle::setVertex1(Point p) {
+void Triangle::setVertex1(const Point& p) {
     // Delete any pre-allocated memory associated to vertex_1.
     delete vertex_1;
 
     // Allocate memory for vertex_1 associated to the input Point.
-    vertex_1 = new Point(p.getX(), p.getY(), p.getZ());
+    vertex_1 = new Point(p);
 }
 
 Point* Triangle::getVertex2() const {
     return vertex_2;
 }
 
-void Triangle::setVertex2(Point p) {
+void Triangle::setVertex2(const Point& p) {
     // Delete any pre-allocated memory associated to vertex_2.
     delete vertex_2;
 
     // Allocate memory for vertex_2 associated to the input Point.
-    vertex_2 = new Point(p.getX(), p.getY(), p.getZ());
+    vertex_2 = new Point(p);
 }
 
 Point* Triangle::getVertex3() const {
     return vertex_3;
 }
 
-void Triangle::setVertex3(Point p) {
+void Triangle::setVertex3(const Point& p) {
     // Delete any pre-allocated memory associated to vertex_3.
     delete vertex_3;
 
     // Allocate memory for vertex_3 associated to the input Point.
-    vertex_3 = new Point(p.getX(), p.getY(), p.getZ());
+    vertex_3 = new Point(p);
 }
 
 // Displays the vertices of the Triangle.
@@ -102,9 +107,9 @@ void Triangle::display() const {
         return;
     }
     
-    cout << "Vertex 1: " << (*vertex_1).display() << endl;
-    cout << "Vertex 2: " << (*vertex_2).display() << endl;
-    cout << "Vertex 3: " << (*vertex_3).display() << endl;
+    cout << "Vertex 1: " << vertex_1->display() << endl;
+    cout << "Vertex 2: " << vertex_2->display() << endl;
+    cout << "Vertex 3: " << vertex_3->display() << endl;
 }
 
 // Moves the Traingle's vertices along a specified axis by distance 'd'.
@@ -129,12 +134,12 @@ double Triangle::calcArea() const {
 
     // Two vectors can be calculated from the three vertices of the triangle.
     // vector_1 = vertex_2 - vertex_1
-    Point vector_1 = Point((vertex_2->getX() - vertex_1->getX()), (vertex_2->getY() - vertex_1->getY()), (vertex_2->getZ() - vertex_1->getZ()));
+    Point vector_1{(vertex_2->getX() - vertex_1->getX()), (vertex_2->getY() - vertex_1->getY()), (vertex_2->getZ() - vertex_1->getZ())};
     // vector_2 = vertex_3 - vertex_1
-    Point vector_2 = Point((vertex_3->getX() - vertex_1->getX()), (vertex_3->getY() - vertex_1->getY()), (vertex_3->getZ() - vertex_1->getZ()));
+    Point vector_2{(vertex_3->getX() - vertex_1->getX()), (vertex_3->getY() - vertex_1->getY()), (vertex_3->getZ() - vertex_1->getZ())};
 
     // Store the cross product of vector_1 & vector_2 in vector_3.
-    Point vector_3 = Point(((vector_1.getY() * vector_2.getZ()) - (vector_1.getZ() * vector_2.getY())), ((vector_1.getZ() * vector_2.getX()) - (vector_1.getX() * vector_2.getZ())), ((vector_1.getX() * vector_2.getY()) - (vector_1.getY() * vector_2.getX())));
+    Point vector_3{((vector_1.getY() * vector_2.getZ()) - (vector_1.getZ() * vector_2.getY())), ((vector_1.getZ() * vector_2.getX()) - (vector_1.getX() * vector_2.getZ())), ((vector_1.getX() * vector_2.getY()) - (vector_1.getY() * vector_2.getX()))};
 
     // Calculate the area of the Triangle.
     // This is expressed as half the magnitude of vector_3.

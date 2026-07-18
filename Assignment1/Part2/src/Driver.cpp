@@ -16,6 +16,9 @@ Driver& Driver::operator=(const Driver& other) {
         // Delete any pre-allocated memory associated to the current object's triangle.
         delete triangle;
 
+		// Ensure the triangle pointer is not dangling.
+		triangle = nullptr;
+
         // Allocate memory for the current object's triangle with another object's triangle.
         if (other.triangle) {
             triangle = new Triangle(*other.triangle);
@@ -35,7 +38,7 @@ Triangle* Driver::getTriangle() const {
     return triangle;
 }
 
-void Driver::setTriangle(Triangle t) {
+void Driver::setTriangle(const Triangle& t) {
     // Delete any pre-allocated memory associated to triangle.
     delete triangle;
 
@@ -44,7 +47,10 @@ void Driver::setTriangle(Triangle t) {
 }
 
 // Creates a Triangle object that can be manipulated by the user.
-void Driver::createTriangle(Point p1, Point p2, Point p3) {
+void Driver::createTriangle(const Point& p1, const Point& p2, const Point& p3) {
+	// Delete the current Triangle object before creating a new one.
+	delete triangle;
+    
     triangle = new Triangle(p1, p2, p3);
 
     cout << "\nTriangle created successfully!" << endl << "Vertices:" << endl;

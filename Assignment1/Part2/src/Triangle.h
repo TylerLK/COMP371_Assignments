@@ -16,7 +16,7 @@ public:
 
     // Constructor
     // Creates an object of type Triangle (Arguments passed).
-    Triangle(Point p1, Point p2, Point p3);
+    Triangle(const Point& p1, const Point& p2, const Point& p3);
 
     // Copy Constructor
     // Creates an object of type Triangle (Object of type Triangle Passed).
@@ -32,13 +32,13 @@ public:
 
     // Getters & Setters
     Point* getVertex1() const;
-    void setVertex1(Point p);
+    void setVertex1(const Point& p);
 
     Point* getVertex2() const;
-    void setVertex2(Point p);
+    void setVertex2(const Point& p);
 
     Point* getVertex3() const;
-    void setVertex3(Point p);
+    void setVertex3(const Point& p);
 
     // Displays the vertices of the Triangle.
     void display() const;

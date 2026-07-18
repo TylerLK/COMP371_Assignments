@@ -21,10 +21,10 @@ public:
 
     // Getters and Setters
     Triangle* getTriangle() const;
-    void setTriangle(Triangle t);
+    void setTriangle(const Triangle& t);
 
     // Creates a Triangle object that can be manipulated by the user.
-    void createTriangle(Point p1, Point p2, Point p3);
+    void createTriangle(const Point& p1, const Point& p2, const Point& p3);
 
     // Translates the triangle by distance 'd' along a provided axis.
     void translate(int d, char axis);
