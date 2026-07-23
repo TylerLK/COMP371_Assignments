@@ -49,7 +49,7 @@ out/
 .vs/
 .idea/
 CMakeSettings.json
-CMakeUserPresets.json
+CMakePresets.json
 
 # CMake generated files
 CMakeFiles/
