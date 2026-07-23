@@ -7,9 +7,9 @@ project ("Assignment2")
 
 # Include the necessary directories for any external libraries
 include_directories(
-	"${CMAKE_CURRENT_SOURCE_DIR}/../external/glew/include"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../external/glfw/include"
-	"${CMAKE_CURRENT_SOURCE_DIR}/../external"
+	"${CMAKE_CURRENT_SOURCE_DIR}/external/glew/include"
+	"${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/include"
+	"${CMAKE_CURRENT_SOURCE_DIR}/external"
 )
 
 # Add executable files
@@ -21,9 +21,9 @@ endif()
 
 # Include appropriate directory filepaths
 target_include_directories(Assignment2 PRIVATE
-	"${CMAKE_SOURCE_DIR}/../external/glew/include"
-	"${CMAKE_SOURCE_DIR}/../external/glfw/include"
-	"${CMAKE_SOURCE_DIR}/../external"
+	"${CMAKE_SOURCE_DIR}/external/glew/include"
+	"${CMAKE_SOURCE_DIR}/external/glfw/include"
+	"${CMAKE_SOURCE_DIR}/external"
 )
 
 # Link GLFW, GLEW, & GLM to this project

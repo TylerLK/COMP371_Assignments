@@ -48,6 +48,8 @@ out/
 # IDE files
 .vs/
 .idea/
+CMakeSettings.json
+CMakeUserPresets.json
 
 # CMake generated files
 CMakeFiles/
