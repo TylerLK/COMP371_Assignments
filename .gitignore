@@ -50,6 +50,7 @@ out/
 .idea/
 CMakeSettings.json
 CMakePresets.json
+!external/glew/build
 
 # CMake generated files
 CMakeFiles/
