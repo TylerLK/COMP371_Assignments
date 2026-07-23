@@ -8,4 +8,14 @@ endif()
 
 project("COMP371_Assignments")
 
+# Disable GLFW's internal Testing & Documentation
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+# External Library Subdirectory
+add_subdirectory(external)
+
+# Project Subdirectories
 add_subdirectory(Assignment1)
+add_subdirectory(Assignment2)
