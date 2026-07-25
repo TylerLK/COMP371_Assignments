@@ -13,7 +13,7 @@ include_directories(
 )
 
 # Add executable files
-add_executable (Assignment2 "src/main.cpp")
+add_executable (Assignment2 "src/main.cpp" "src/Shader.h" "src/Shader.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET Assignment2 PROPERTY CXX_STANDARD 20)
