@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "Driver.h"
 
 #include <iostream>
 
@@ -30,6 +31,8 @@ int height;            // The height of the window (In Pixels)
 float aspectRatio;     // The aspect ratio of the window (width / height)
 
 glm::mat4 modelMatrix, viewMatrix, projectionMatrix; // 4x4 model, view, and perspective matrices
+
+Driver pyramidDriver;
 
 // Redering Function Prototypes
 void setupVertices(void);
@@ -70,6 +73,8 @@ int main(void) {
 
 	// Create the main program loop.
 	while (!glfwWindowShouldClose(window)) {
+		pyramidDriver.processInput(window); // Process user input for the current frame
+
 		// ender the desired scene in the OpenGL context
 		display(window, glfwGetTime());
 
@@ -122,9 +127,9 @@ void init(GLFWwindow* window) {
 	cameraLocY = 0.0f;
 	cameraLocZ = 5.0f;
 
-	pyramidLocX = 0.0f;
+	/*pyramidLocX = 0.0f;
 	pyramidLocY = 0.0f;
-	pyramidLocZ = 0.0f;
+	pyramidLocZ = 0.0f;*/
 
 	// Set up all vertices, VAOs, & VBOs
 	setupVertices();
@@ -147,7 +152,8 @@ void display(GLFWwindow* window, double currentTime) {
 	projectionLoc = glGetUniformLocation(renderingProgram, "projection_matrix");
 
 	// Build the Model Matrix
-	modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pyramidLocX, pyramidLocY, pyramidLocZ));
+	modelMatrix = pyramidDriver.getModelMatrix();
+	//modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pyramidLocX, pyramidLocY, pyramidLocZ));
 
 	// Build the View Matrix
 	// Create the eye (i.e. the oiion of  hecamera in the world)

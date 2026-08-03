@@ -21,7 +21,7 @@ private:
 
     // Per Frame, Need a Low Number Scaling Factor
     float d = 0.01f;   // translation distance per key press
-    float s = 0.05f;   // scale factor per key press
+    float s = 0.15f;   // scale factor per key press
 
     bool qWasPressed = false;
     bool eWasPressed = false;
