@@ -13,7 +13,7 @@ include_directories(
 )
 
 # Add executable files
-add_executable (Assignment2 "src/main.cpp" "src/Shader.h" "src/Shader.cpp" "src/Utils.h" "src/Utils.cpp")
+add_executable (Assignment2 "src/main.cpp" "src/Shader.h" "src/Shader.cpp" "src/Utils.h" "src/Utils.cpp" "src/driver.cpp" "src/Driver.H")
 
 # Copy the shaders to the build directory
 add_custom_command(TARGET Assignment2 POST_BUILD
