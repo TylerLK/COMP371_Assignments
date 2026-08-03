@@ -13,7 +13,14 @@ include_directories(
 )
 
 # Add executable files
-add_executable (Assignment2 "src/main.cpp" "src/Shader.h" "src/Shader.cpp")
+add_executable (Assignment2 "src/main.cpp" "src/Shader.h" "src/Shader.cpp" "src/Utils.h" "src/Utils.cpp")
+
+# Copy the shaders to the build directory
+add_custom_command(TARGET Assignment2 POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+		"${CMAKE_CURRENT_SOURCE_DIR}/src/shaders"
+		$<TARGET_FILE_DIR:Assignment2>/shaders
+)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET Assignment2 PROPERTY CXX_STANDARD 20)
