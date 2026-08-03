@@ -1,7 +1,14 @@
 #include "Driver.h"
 #include <glm/gtc/matrix_transform.hpp>
 
+// Default Constructor
 Driver::Driver() : translation(0.0f, 0.0f, 0.0f), rotationAngle(0.0f), scaleFactor(1.0f, 1.0f, 1.0f) {}
+
+//Constructor
+Driver::Driver(const glm::vec3 initalPos) : translation(initalPos), rotationAngle(0.0f), scaleFactor(1.0f, 1.0f, 1.0f) { }
+
+// Destructor
+Driver::~Driver() { }
 
 glm::mat4 Driver::getModelMatrix() const {
     glm::mat4 model = glm::mat4(1.0f);
@@ -17,14 +24,14 @@ glm::mat4 Driver::getModelMatrix() const {
 void Driver::processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-/*
-    W = Translate Up
-    S = Translate Down
-    A = Translate Left
-    D = Translate Right
+    /*
+        W = Translate Up
+        S = Translate Down
+        A = Translate Left
+        D = Translate Right
 
-    These fire every frame the key is held
-*/
+        These fire every frame the key is held
+    */
 
     // Translate up by d
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {

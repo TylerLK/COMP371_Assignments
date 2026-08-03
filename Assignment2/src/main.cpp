@@ -3,12 +3,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "Driver.h"
 
 #include <iostream>
 
 #include "Utils.h"
-#include "Shader.h"
+#include "Driver.h"
 
 using namespace std;
 
@@ -68,8 +67,6 @@ int main(void) {
 
 	// Initialize the attributes of your OpenGL context
 	init(window);
-	
-	// TODO: Integrate the callback functions here
 
 	// Create the main program loop.
 	while (!glfwWindowShouldClose(window)) {
@@ -127,9 +124,12 @@ void init(GLFWwindow* window) {
 	cameraLocY = 0.0f;
 	cameraLocZ = 5.0f;
 
-	/*pyramidLocX = 0.0f;
+	pyramidLocX = 0.0f;
 	pyramidLocY = 0.0f;
-	pyramidLocZ = 0.0f;*/
+	pyramidLocZ = 0.0f;
+
+	// Initialize the object containing all of the Pyramid object's current state variable
+	pyramidDriver = Driver(glm::vec3(pyramidLocX, pyramidLocY, pyramidLocZ));
 
 	// Set up all vertices, VAOs, & VBOs
 	setupVertices();
@@ -153,7 +153,6 @@ void display(GLFWwindow* window, double currentTime) {
 
 	// Build the Model Matrix
 	modelMatrix = pyramidDriver.getModelMatrix();
-	//modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pyramidLocX, pyramidLocY, pyramidLocZ));
 
 	// Build the View Matrix
 	// Create the eye (i.e. the oiion of  hecamera in the world)
@@ -179,8 +178,8 @@ void display(GLFWwindow* window, double currentTime) {
 	aspectRatio = (float)width / (float)height;
 
 	// Define the near and far clipping plane distances
-	float near = 0.1f; // Near-clipping plane
-	float far = 100.0f; // Far-clipping plane
+	float near = 0.01f; // Near-clipping plane
+	float far = 1000.0f; // Far-clipping plane
 
 	projectionMatrix = glm::perspective(glm::radians(fovy), aspectRatio, near, far);
 
@@ -195,6 +194,9 @@ void display(GLFWwindow* window, double currentTime) {
 	// Enable built-in Z-Buffering Algorithm for hidden surface removal
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+
+	// Uncomment this lineto see the wireframe of the Pyramid
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	// Initiate the OpenGL pipelining process
 	// GL_TRIANGLES: Type of primitive used
