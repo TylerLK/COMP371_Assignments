@@ -3,8 +3,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <SOIL2.h>
 
 #include <iostream>
+#include <string>
+#include <fstream>
+#include <cmath>
 
 #include "Utils.h"
 #include "Driver.h"
@@ -12,12 +16,19 @@
 using namespace std;
 
 // Local Variables
-constexpr int NUMVAOS = 1; // Number of Vertex Array Objects
-constexpr int NUMVBOS = 1; // Number of Vertex Buffer Objects
+constexpr int NUM_VAO = 1;                                    // Number of Vertex Array Objects
+constexpr int NUM_VBO = 1;                                    // Number of Vertex Buffer Objects
+constexpr int WINDOW_WIDTH = 600;                             // Window width
+constexpr int WINDOW_HEIGHT = 600;                            // Window height
+constexpr const char* WINDOW_TITLE = "COMP371 Assignment#3";  // Window title
+constexpr float ROTATION_ANGLE = 45.0f;                       // Rotation of the model (In degrees)
+constexpr float FOVY = 45.0f;                                 // Field of view in the y direction
+constexpr float Z_NEAR = 0.1f;                                // Near-clipping plane
+constexpr float Z_FAR = 1000.0f;                              // Far-clipping plane
 
 GLuint renderingProgram; // Holds the Shader Program ID
-GLuint vao[NUMVAOS];     // Holds the ID of the Vertex Array Object(s)
-GLuint vbo[NUMVBOS];     // Holds the ID of the Vertex Buffer Object(s)
+GLuint vao[NUM_VAO];     // Holds the ID of the Vertex Array Object(s)
+GLuint vbo[NUM_VBO];     // Holds the ID of the Vertex Buffer Object(s)
 
 float cameraLocX, cameraLocY, cameraLocZ;    // Initial location data for your camera
 float pyramidLocX, pyramidLocY, pyramidLocZ; // Initial location data for your pyramid
@@ -29,6 +40,7 @@ int width;             // The width of the window (In Pixels)
 int height;            // The height of the window (In Pixels)
 float aspectRatio;     // The aspect ratio of the window (width / height)
 
+const glm::mat4 iMat(1.0f);                          // 4x4 Identity matrix
 glm::mat4 modelMatrix, viewMatrix, projectionMatrix; // 4x4 model, view, and perspective matrices
 
 Driver modelDriver;
@@ -37,6 +49,7 @@ Driver modelDriver;
 void setupVertices(void);
 void init(GLFWwindow* window);
 void display(GLFWwindow* window, double currentTime);
+void window_resize_callback(GLFWwindow* window, int newWidth, int newHeight);
 
 int main(void) {
 	// Initialize the GLFW Library
@@ -46,7 +59,8 @@ int main(void) {
 	}
 
 	// Create a window & context to hold the content created by the current program
-	GLFWwindow* window = glfwCreateWindow(600, 600, "COMP371 Assignment#2", NULL, NULL);
+	glfwWindowHint(GLFW_DEPTH_BITS, 24);
+	GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
 	if (!window) {
 		cout << "Window creation failed..." << endl;
 		glfwTerminate();
@@ -64,6 +78,9 @@ int main(void) {
 		cout << "GLEW initialization failed..." << endl;
 		return EXIT_FAILURE;
 	}
+
+	// Ensure the rendered scene is displayed properly, even when the window is resized
+	glfwSetWindowSizeCallback(window, window_resize_callback);
 
 	// Initialize the attributes of your OpenGL context
 	init(window);
@@ -89,7 +106,7 @@ int main(void) {
 
 // Creates and initializes the vertices, VAO(s), and VBO(s) for the OpenGL program
 void setupVertices(void) {
-	// Define the vertices for the Pyramid
+	// Define the vertices for the model
 	// 6 Triangles -> 18 Vertices -> 54 indices
 	float vertexPositions[54]{
 		-1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Front Face
@@ -101,11 +118,11 @@ void setupVertices(void) {
 	};
 
 	// Define and bind a VAO for the current OpenGL program
-	glGenVertexArrays(NUMVAOS, vao);
+	glGenVertexArrays(NUM_VAO, vao);
 	glBindVertexArray(vao[0]);
 
 	// Define and bind a VBO for the current OpenGL program
-	glGenBuffers(NUMVBOS, vbo);
+	glGenBuffers(NUM_VBO, vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
 
@@ -131,8 +148,22 @@ void init(GLFWwindow* window) {
 	// Initialize the object containing all of the Pyramid object's current state variable
 	modelDriver = Driver(glm::vec3(pyramidLocX, pyramidLocY, pyramidLocZ));
 
+	// Enable built-in Z-Buffering Algorithm for hidden surface removal
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
 	// Set up all vertices, VAOs, & VBOs
 	setupVertices();
+
+	// Build Projection Matrix (This is done in "init()" once, for performance purposes)
+	// Retrieve the width and height information of the window
+	glfwGetFramebufferSize(window, &width, &height);
+
+	// Calculate the aspect ratio of the window
+	aspectRatio = (float)width / (float)height;
+
+
+	projectionMatrix = glm::perspective(glm::radians(FOVY), aspectRatio, Z_NEAR, Z_FAR);
 }
 
 // Renders the desired scene in the OpenGL context
@@ -167,22 +198,6 @@ void display(GLFWwindow* window, double currentTime) {
 
 	viewMatrix = glm::lookAt(eye, at, up);
 
-	// Build the Perspective Matrix
-	// Retrieve the width and height information of the window
-	glfwGetFramebufferSize(window, &width, &height);
-
-	// Define the Field of View in the y-direction (In Radians)
-	float fovy = 45.0f; // 45 degrees
-
-	// Calculate the aspect ratio of the window
-	aspectRatio = (float)width / (float)height;
-
-	// Define the near and far clipping plane distances
-	float near = 0.01f; // Near-clipping plane
-	float far = 1000.0f; // Far-clipping plane
-
-	projectionMatrix = glm::perspective(glm::radians(fovy), aspectRatio, near, far);
-
 	// Send the model, view, and perspective matrices to their GLSL uniform variable counterparts
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
@@ -191,16 +206,26 @@ void display(GLFWwindow* window, double currentTime) {
 	// Re-bind the VAO to ensure the correct vertex data is being drawn
 	glBindVertexArray(vao[0]);
 
-	// Enable built-in Z-Buffering Algorithm for hidden surface removal
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-
-	// Uncomment this lineto see the wireframe of the Pyramid
+	// Uncomment this line to see the wireframe of the model
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	// Define the front face of your model's primitives as Counter-Clockwise
+	glFrontFace(GL_CCW);
 
 	// Initiate the OpenGL pipelining process
 	// GL_TRIANGLES: Type of primitive used
 	// 0: Which vertex to start with
 	// 18: The number of vertices to render
 	glDrawArrays(GL_TRIANGLES, 0, 18);
+}
+
+void window_resize_callback(GLFWwindow* window, int newWidth, int newHeight) {
+	// The new width and height of the window are provided by the callback
+	aspectRatio = (float)newWidth / (float)newHeight;
+
+	// Set the screen regio associated with the framebuffer 
+	glViewport(0, 0, newWidth, newHeight);
+
+	// Re-calculate the Projection Matrix
+	projectionMatrix = glm::perspective(glm::radians(FOVY), aspectRatio, Z_NEAR, Z_FAR);
 }
