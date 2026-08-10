@@ -20,7 +20,7 @@ GLuint vao[NUMVAOS];     // Holds the ID of the Vertex Array Object(s)
 GLuint vbo[NUMVBOS];     // Holds the ID of the Vertex Buffer Object(s)
 
 float cameraLocX, cameraLocY, cameraLocZ;    // Initial location data for your camera
-float pyramidLocX, pyramidLocY, pyramidLocZ; // Initial location data for your pyramid
+float modelLocX, modelLocY, modelLocZ; // Initial location data for your pyramid
 
 GLuint modelLoc;       // Holds the ID of the model matrix GLSL uniform variable
 GLuint viewLoc;        // Holds the ID of the view matrix GLSL uniform variable
@@ -124,12 +124,12 @@ void init(GLFWwindow* window) {
 	cameraLocY = 0.0f;
 	cameraLocZ = 5.0f;
 
-	pyramidLocX = 0.0f;
-	pyramidLocY = 0.0f;
-	pyramidLocZ = 0.0f;
+	modelLocX = 0.0f;
+	modelLocY = 0.0f;
+	modelLocZ = 0.0f;
 
 	// Initialize the object containing all of the Pyramid object's current state variable
-	modelDriver = Driver(glm::vec3(pyramidLocX, pyramidLocY, pyramidLocZ));
+	modelDriver = Driver(glm::vec3(modelLocX, modelLocY, modelLocZ));
 
 	// Set up all vertices, VAOs, & VBOs
 	setupVertices();

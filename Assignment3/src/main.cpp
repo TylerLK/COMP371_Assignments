@@ -4,11 +4,13 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <SOIL2.h>
+#include <tiny_obj_loader.h>
 
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <cmath>
+#include <vector>
 
 #include "Utils.h"
 #include "Driver.h"
@@ -17,10 +19,10 @@ using namespace std;
 
 // Local Variables
 constexpr int NUM_VAO = 1;                                    // Number of Vertex Array Objects
-constexpr int NUM_VBO = 1;                                    // Number of Vertex Buffer Objects
+constexpr int NUM_VBO = 3;                                    // Number of Vertex Buffer Objects
 constexpr int WINDOW_WIDTH = 600;                             // Window width
 constexpr int WINDOW_HEIGHT = 600;                            // Window height
-constexpr const char* WINDOW_TITLE = "COMP371 Assignment#3";  // Window title
+constexpr const char* WINDOW_TITLE = "COMP371 Assignment #3";  // Window title
 constexpr float ROTATION_ANGLE = 45.0f;                       // Rotation of the model (In degrees)
 constexpr float FOVY = 45.0f;                                 // Field of view in the y direction
 constexpr float Z_NEAR = 0.1f;                                // Near-clipping plane
@@ -31,7 +33,7 @@ GLuint vao[NUM_VAO];     // Holds the ID of the Vertex Array Object(s)
 GLuint vbo[NUM_VBO];     // Holds the ID of the Vertex Buffer Object(s)
 
 float cameraLocX, cameraLocY, cameraLocZ;    // Initial location data for your camera
-float pyramidLocX, pyramidLocY, pyramidLocZ; // Initial location data for your pyramid
+float modelLocX, modelLocY, modelLocZ;       // Initial location data for your model
 
 GLuint modelLoc;       // Holds the ID of the model matrix GLSL uniform variable
 GLuint viewLoc;        // Holds the ID of the view matrix GLSL uniform variable
@@ -43,13 +45,20 @@ float aspectRatio;     // The aspect ratio of the window (width / height)
 const glm::mat4 iMat(1.0f);                          // 4x4 Identity matrix
 glm::mat4 modelMatrix, viewMatrix, projectionMatrix; // 4x4 model, view, and perspective matrices
 
-Driver modelDriver;
+Driver modelDriver;             // Contains the current state of the model's transformation data
+vector<float> modelVertexData;  // Holds the vertex position data for the imported model
+vector<float> modelTextureData; // Holds the vertex texture data for the imported model
+vector<float> modelNormalData;  // Holds the vertex normal data for the imported model
+
+bool showWireframe = false; // A flag to keep track of whether the raw wireframe should be visible or not
 
 // Redering Function Prototypes
+void loadModel(const string& objFilePath);
 void setupVertices(void);
 void init(GLFWwindow* window);
 void display(GLFWwindow* window, double currentTime);
 void window_resize_callback(GLFWwindow* window, int newWidth, int newHeight);
+void show_wireframe_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 int main(void) {
 	// Initialize the GLFW Library
@@ -82,14 +91,18 @@ int main(void) {
 	// Ensure the rendered scene is displayed properly, even when the window is resized
 	glfwSetWindowSizeCallback(window, window_resize_callback);
 
+	// Ensure that the drawing mode is toggled when the 'X' key is pressed
+	glfwSetKeyCallback(window, show_wireframe_callback);
+
 	// Initialize the attributes of your OpenGL context
 	init(window);
 
 	// Create the main program loop.
 	while (!glfwWindowShouldClose(window)) {
-		modelDriver.processInput(window); // Process user input for the current frame
+		// Process user input for the current frame
+		modelDriver.processInput(window);
 
-		// ender the desired scene in the OpenGL context
+		// Render the desired scene in the OpenGL context
 		display(window, glfwGetTime());
 
 		// Swap the front and back buffers to display the rendered image
@@ -104,31 +117,95 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 
-// Creates and initializes the vertices, VAO(s), and VBO(s) for the OpenGL program
-void setupVertices(void) {
-	// Define the vertices for the model
-	// 6 Triangles -> 18 Vertices -> 54 indices
-	float vertexPositions[54]{
-		-1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Front Face
-		1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // Right Face
-		1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // Back Face
-		-1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Left Face
-		-1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, // Bottom Face (Left + Front)
-		1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f // Bottom Face (Front + Right)
-	};
+// Loads an external DDC tool model given a .obj file's path
+void loadModel(const string& objFilePath) {
+	// Define the data structures for holding raw .obj file data
+	tinyobj::attrib_t attrib;
+	vector<tinyobj::shape_t> shapes;
+	vector<tinyobj::material_t> materials;
+	string warning, error;
 
+	// Ensure the .obj file data is loaded correctly into the data defined structures
+	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warning, &error, objFilePath.c_str())) {
+		cerr << "Failed to load: " << error << endl;
+		return;
+	}
+
+	// Ensure the float vectors are empty before transferring the vertex, texture, and normal data
+	modelVertexData.clear();
+	modelTextureData.clear();
+	modelNormalData.clear();
+
+	// Iterate through all the shape_t objects in "shapes"
+	for (size_t shape = 0; shape < shapes.size(); shape++) {
+		// Determine the number of primitives in the current shape_t object
+		size_t num_shape_primitives = shapes[shape].mesh.num_face_vertices.size();
+
+		// Iterate through each primitive in the current shape_t object
+		for (size_t primitive = 0; primitive < num_shape_primitives; primitive++) {
+			// Determine the number of vertices in the current primitive (Should be 3)
+			size_t num_primitive_vertices = shapes[shape].mesh.num_face_vertices[primitive];
+
+			// Iterate through each vertex to construct the vertex, texture, and normal data
+			for (size_t vertex = 0; vertex < num_primitive_vertices; vertex++) {
+				// Determine the index of the current vertex
+				tinyobj::index_t index = shapes[shape].mesh.indices[primitive * num_primitive_vertices + vertex];
+
+				// Transfer the vertex position data
+				modelVertexData.push_back(attrib.vertices[3 * size_t(index.vertex_index) + 0]); // x Coordinate
+				modelVertexData.push_back(attrib.vertices[3 * size_t(index.vertex_index) + 1]); // y Coordinate
+				modelVertexData.push_back(attrib.vertices[3 * size_t(index.vertex_index) + 2]); // z Coordinate
+
+				// Transfer the vertex texture data, if it exists
+				if (index.texcoord_index >= 0) {
+					modelTextureData.push_back(attrib.texcoords[2 * size_t(index.texcoord_index) + 0]); // u Coordinate
+					modelTextureData.push_back(attrib.texcoords[2 * size_t(index.texcoord_index) + 1]); // v Coordinate
+				}
+
+				// Transfer the vertex normal data, if it exists
+				if (index.normal_index >= 0) {
+					modelNormalData.push_back(attrib.normals[3 * size_t(index.normal_index) + 0]); // x Direction
+					modelNormalData.push_back(attrib.normals[3 * size_t(index.normal_index) + 1]); // y Direction
+					modelNormalData.push_back(attrib.normals[3 * size_t(index.normal_index) + 2]); // z Direction
+				}
+
+			}
+		}
+	}
+}
+
+// Creates and initializes the VAO(s) and VBO(s) for the OpenGL program
+void setupVertices(void) {
 	// Define and bind a VAO for the current OpenGL program
 	glGenVertexArrays(NUM_VAO, vao);
 	glBindVertexArray(vao[0]);
 
-	// Define and bind a VBO for the current OpenGL program
+	// Define the VBO(s) for the current OpenGL program
 	glGenBuffers(NUM_VBO, vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
 
-	// Associate the VBO to the Vertex Attribute Pointer for the current OpenGL program
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
+	// Bind vbo[0] to Vertex Position Data
+	if (!modelVertexData.empty()) {
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, modelVertexData.size() * sizeof(float), modelVertexData.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(0);
+	}
+
+	// Bind vbo[1] to Vertex Texture Data
+	if (!modelTextureData.empty()) {
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glBufferData(GL_ARRAY_BUFFER, modelTextureData.size() * sizeof(float), modelTextureData.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(1);
+	}
+
+	// Bind vbo[2] to Vertex Normal Data
+	if (!modelNormalData.empty()) {
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+		glBufferData(GL_ARRAY_BUFFER, modelNormalData.size() * sizeof(float), modelNormalData.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(2);
+	}
 }
 
 // Initialize the attributes of your OpenGL context
@@ -141,16 +218,19 @@ void init(GLFWwindow* window) {
 	cameraLocY = 0.0f;
 	cameraLocZ = 5.0f;
 
-	pyramidLocX = 0.0f;
-	pyramidLocY = 0.0f;
-	pyramidLocZ = 0.0f;
+	modelLocX = 0.0f;
+	modelLocY = 0.0f;
+	modelLocZ = 0.0f;
 
 	// Initialize the object containing all of the Pyramid object's current state variable
-	modelDriver = Driver(glm::vec3(pyramidLocX, pyramidLocY, pyramidLocZ));
+	modelDriver = Driver(glm::vec3(modelLocX, modelLocY, modelLocZ), ROTATION_ANGLE);
 
 	// Enable built-in Z-Buffering Algorithm for hidden surface removal
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+
+	// Load the external DCC model
+	loadModel("assets/models/chair.obj");
 
 	// Set up all vertices, VAOs, & VBOs
 	setupVertices();
@@ -206,19 +286,23 @@ void display(GLFWwindow* window, double currentTime) {
 	// Re-bind the VAO to ensure the correct vertex data is being drawn
 	glBindVertexArray(vao[0]);
 
-	// Uncomment this line to see the wireframe of the model
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	if (showWireframe) {
+		// Render the wireframe of the model
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+	else {
+		// Render solid polygons for the model
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 
 	// Define the front face of your model's primitives as Counter-Clockwise
 	glFrontFace(GL_CCW);
 
 	// Initiate the OpenGL pipelining process
-	// GL_TRIANGLES: Type of primitive used
-	// 0: Which vertex to start with
-	// 18: The number of vertices to render
-	glDrawArrays(GL_TRIANGLES, 0, 18);
+	glDrawArrays(GL_TRIANGLES, 0, (modelVertexData.size() / 3));
 }
 
+// Adapts the rendered image to the window when it is resized
 void window_resize_callback(GLFWwindow* window, int newWidth, int newHeight) {
 	// The new width and height of the window are provided by the callback
 	aspectRatio = (float)newWidth / (float)newHeight;
@@ -228,4 +312,11 @@ void window_resize_callback(GLFWwindow* window, int newWidth, int newHeight) {
 
 	// Re-calculate the Projection Matrix
 	projectionMatrix = glm::perspective(glm::radians(FOVY), aspectRatio, Z_NEAR, Z_FAR);
+}
+
+// Toggles the visibility of the wireframe when the 'X' key is pressed
+void show_wireframe_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	if (key == GLFW_KEY_X && action == GLFW_PRESS) {
+		showWireframe = !showWireframe;
+	}
 }

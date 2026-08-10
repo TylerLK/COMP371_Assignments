@@ -7,13 +7,21 @@ project ("Assignment3")
 
 # Include the necessary directories for any external libraries
 include_directories(
-	"${CMAKE_CURRENT_SOURCE_DIR}/external/glew/include"
-	"${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/include"
-	"${CMAKE_CURRENT_SOURCE_DIR}/external"
+	"${CMAKE_SOURCE_DIR}/external/glew/include"
+	"${CMAKE_SOURCE_DIR}/external/glfw/include"
+	"${CMAKE_SOURCE_DIR}/external"
+	"${CMAKE_SOURCE_DIR}/external/tinyobjloader"
 )
 
 # Add executable files
-add_executable (Assignment3 "src/main.cpp" "src/Utils.h" "src/Utils.cpp" "src/driver.cpp" "src/Driver.H")
+add_executable (Assignment3
+	"src/main.cpp"
+	"src/Utils.h"
+	"src/Utils.cpp"
+	"src/driver.cpp"
+	"src/Driver.H"
+	"src/tiny_obj_loader.cc"
+)
 
 # Copy the shaders to the build directory
 add_custom_command(TARGET Assignment3 POST_BUILD
@@ -39,6 +47,7 @@ target_include_directories(Assignment3 PRIVATE
 	"${CMAKE_SOURCE_DIR}/external/glfw/include"
 	"${CMAKE_SOURCE_DIR}/external"
 	"${CMAKE_SOURCE_DIR}/external/SOIL2/src/SOIL2"
+	"${CMAKE_SOURCE_DIR}/external/tinyobjloader"
 )
 
 # Define the SOIL2 Library as an import target

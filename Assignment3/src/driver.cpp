@@ -5,7 +5,7 @@
 Driver::Driver() : translation(0.0f, 0.0f, 0.0f), rotationAngle(0.0f), scaleFactor(1.0f, 1.0f, 1.0f) {}
 
 //Constructor
-Driver::Driver(const glm::vec3 initalPos) : translation(initalPos), rotationAngle(0.0f), scaleFactor(1.0f, 1.0f, 1.0f) { }
+Driver::Driver(const glm::vec3 initalPos, const float initialRotAngle) : translation(initalPos), rotationAngle(initialRotAngle), scaleFactor(1.0f, 1.0f, 1.0f) { }
 
 // Destructor
 Driver::~Driver() { }
@@ -15,7 +15,7 @@ glm::mat4 Driver::getModelMatrix() const {
 
     // Apply translation, rotation, and scale to `model` here.
     model = glm::translate(model, translation);
-	model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
 	model = glm::scale(model, scaleFactor);
 
     return model;
@@ -65,28 +65,28 @@ void Driver::processInput(GLFWwindow* window) {
     bool qIsPressed = glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS;
     if (qIsPressed && !qWasPressed) {
         // Rotate 30 degrees anticlockwise
-		rotationAngle += 30.0f;
+		rotationAngle += r;
     }
     qWasPressed = qIsPressed;
 
     bool eIsPressed = glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS;
     if (eIsPressed && !eWasPressed) {
         // Rotate 30 degrees clockwise
-		rotationAngle -= 30.0f;
+		rotationAngle -= r;
     }
     eWasPressed = eIsPressed;
 
     bool rIsPressed = glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS;
     if (rIsPressed && !rWasPressed) {
-        // Scale in +z direction by factor s
-		scaleFactor.z += s;
+        // Scale up direction by factor s
+		scaleFactor *= s;
     }
     rWasPressed = rIsPressed;
 
     bool fIsPressed = glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS;
     if (fIsPressed && !fWasPressed) {
-        // Scale in -z direction by factor s
-		scaleFactor.z -= s;
+        // Scale down direction by factor s
+		scaleFactor /= s;
     }
     fWasPressed = fIsPressed;
 }

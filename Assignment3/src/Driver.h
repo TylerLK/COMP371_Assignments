@@ -10,7 +10,7 @@ public:
     Driver();
 
     // Constructor
-    Driver(const glm::vec3 initalPos);
+    Driver(const glm::vec3 initalPos, const float initalRotAngle);
 
     // Destructor
     ~Driver();
@@ -29,7 +29,8 @@ private:
 
     // Per Frame, Need a Low Number Scaling Factor
     float d = 0.01f;   // translation distance per key press
-    float s = 0.15f;   // scale factor per key press
+	float r = 30.0f;   // rotation angle per key press
+    float s = 1.5f;    // scale factor per key press
 
     // Guards against multiple key pressed for Rotation & Scaling
     bool qWasPressed = false;
