@@ -49,8 +49,10 @@ Driver modelDriver;             // Contains the current state of the model's tra
 vector<float> modelVertexData;  // Holds the vertex position data for the imported model
 vector<float> modelTextureData; // Holds the vertex texture data for the imported model
 vector<float> modelNormalData;  // Holds the vertex normal data for the imported model
+GLuint chairTexture;            // Holds the ID of the model's texture
 
 bool showWireframe = false; // A flag to keep track of whether the raw wireframe should be visible or not
+GLuint showWireframeLoc;    // Holds the ID of the wireframe visibility flag GLSL uniform variable
 
 // Redering Function Prototypes
 void loadModel(const string& objFilePath);
@@ -215,8 +217,8 @@ void init(GLFWwindow* window) {
 
 	// Initialize the position for both your camera and pyramid
 	cameraLocX = 0.0f;
-	cameraLocY = 0.0f;
-	cameraLocZ = 5.0f;
+	cameraLocY = 10.0f;
+	cameraLocZ = 30.0f;
 
 	modelLocX = 0.0f;
 	modelLocY = 0.0f;
@@ -228,6 +230,10 @@ void init(GLFWwindow* window) {
 	// Enable built-in Z-Buffering Algorithm for hidden surface removal
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
+
+	// Enable face culling
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CCW);
 
 	// Load the external DCC model
 	loadModel("assets/models/chair.obj");
@@ -242,8 +248,10 @@ void init(GLFWwindow* window) {
 	// Calculate the aspect ratio of the window
 	aspectRatio = (float)width / (float)height;
 
-
 	projectionMatrix = glm::perspective(glm::radians(FOVY), aspectRatio, Z_NEAR, Z_FAR);
+
+	// Load the texture of the model
+	chairTexture = Utils::loadtexture("assets/textures/chairTexture.jpg");
 }
 
 // Renders the desired scene in the OpenGL context
@@ -261,6 +269,7 @@ void display(GLFWwindow* window, double currentTime) {
 	modelLoc = glGetUniformLocation(renderingProgram, "model_matrix");
 	viewLoc = glGetUniformLocation(renderingProgram, "view_matrix");
 	projectionLoc = glGetUniformLocation(renderingProgram, "projection_matrix");
+	showWireframeLoc = glGetUniformLocation(renderingProgram, "show_wireframe");
 
 	// Build the Model Matrix
 	modelMatrix = modelDriver.getModelMatrix();
@@ -268,7 +277,6 @@ void display(GLFWwindow* window, double currentTime) {
 	// Build the View Matrix
 	// Create the eye (i.e. the oiion of  hecamera in the world)
 	glm::vec3 eye(cameraLocX, cameraLocY, cameraLocZ);
-
 
 	// Create the at (i.e, the point in the world space that the camera is looking at)
 	glm::vec3 at(0.0f, 0.0f, 0.0f); // The camera is looking at the origin of the world coordinate system
@@ -282,6 +290,7 @@ void display(GLFWwindow* window, double currentTime) {
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+	glUniform1i(showWireframeLoc, showWireframe);
 
 	// Re-bind the VAO to ensure the correct vertex data is being drawn
 	glBindVertexArray(vao[0]);
@@ -289,14 +298,10 @@ void display(GLFWwindow* window, double currentTime) {
 	if (showWireframe) {
 		// Render the wireframe of the model
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	}
-	else {
+	} else {
 		// Render solid polygons for the model
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
-
-	// Define the front face of your model's primitives as Counter-Clockwise
-	glFrontFace(GL_CCW);
 
 	// Initiate the OpenGL pipelining process
 	glDrawArrays(GL_TRIANGLES, 0, (modelVertexData.size() / 3));

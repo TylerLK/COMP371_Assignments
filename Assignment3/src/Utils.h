@@ -13,6 +13,9 @@ namespace Utils {
 	GLuint createShaderProgram(void);
 	string readShaderSource(const char* filePath);
 
+	// Texture-Handling Methods
+	GLuint loadtexture(const char* textureImageFilePath);
+
 	// Error Handling Methods
 	void printShaderLog(GLuint shader);
 	void printProgramLog(int program);
