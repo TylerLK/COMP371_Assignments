@@ -13,6 +13,7 @@ out vec3 vertex_normal;
 uniform mat4 model_matrix;
 uniform mat4 view_matrix;
 uniform mat4 projection_matrix;
+uniform bool show_wireframe;  // NOT USED
 
 void main(void) {
 	// Pass your vertex positional data to the fragment shader

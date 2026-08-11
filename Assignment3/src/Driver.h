@@ -28,7 +28,7 @@ private:
     glm::vec3 scaleFactor;
 
     // Per Frame, Need a Low Number Scaling Factor
-    float d = 0.01f;   // translation distance per key press
+    float d = 0.5f;   // translation distance per key press
 	float r = 30.0f;   // rotation angle per key press
     float s = 1.5f;    // scale factor per key press
 

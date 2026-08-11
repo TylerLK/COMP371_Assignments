@@ -1,3 +1,5 @@
+#include <SOIL2.h>
+
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -80,6 +82,37 @@ namespace Utils {
 		fileStream.close();
 
 		return content;
+	}
+
+	// Creates the ID of a texture given its image file path
+	GLuint loadtexture(const char* textureImageFilePath) {
+		// Create a unsigned integer to hold the ID of your texture
+		GLuint textureID;
+
+		// Load the texture by leveraging the SOIL2 library
+		textureID = SOIL_load_OGL_texture(textureImageFilePath, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_INVERT_Y);
+
+		// Ensure that the texture has been loaded correctly
+		if (textureID == 0) {
+			cout << "Could not find texture file for " << textureImageFilePath << endl;
+			return 0;
+		}
+
+		// Define Mipmapping
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		// Define Anisotropic Filtering
+		if (glewIsSupported("GL_EXT_texture_filter_anisotropic")) {
+			GLfloat anisoSetting = 0.0f;
+			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisoSetting);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoSetting);
+		}
+
+		return textureID;
 	}
 
 	// Display the contents of OpenGL's log when GLSL compilation fails
