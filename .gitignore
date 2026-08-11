@@ -51,6 +51,8 @@ out/
 CMakeSettings.json
 CMakePresets.json
 !external/glew/build
+!assets/
+!assets/models/
 !assets/models/*.obj
 
 # CMake generated files
